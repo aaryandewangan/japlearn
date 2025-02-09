@@ -1,0 +1,56 @@
+.sakuraContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1;
+  overflow: hidden;
+}
+
+.tree {
+  position: absolute;
+  bottom: 0;
+  right: 5%;
+  width: 300px;
+  height: 400px;
+  background: url('/sakura-tree.svg') no-repeat;
+  background-size: contain;
+  opacity: 0.7;
+}
+
+.treeDark {
+  opacity: 0.7;
+}
+
+.treeLight {
+  opacity: 0.4;
+}
+
+.petal {
+  position: absolute;
+  border-radius: 150% 0 150% 0;
+  animation: falling linear infinite;
+  transform: rotate(45deg);
+}
+
+@keyframes falling {
+  0% {
+    top: -10%;
+    transform: rotate(0deg) translateX(0);
+  }
+  25% {
+    transform: rotate(45deg) translateX(15px);
+  }
+  50% {
+    transform: rotate(90deg) translateX(0);
+  }
+  75% {
+    transform: rotate(135deg) translateX(-15px);
+  }
+  100% {
+    top: 100%;
+    transform: rotate(180deg) translateX(0);
+  }
+} 
