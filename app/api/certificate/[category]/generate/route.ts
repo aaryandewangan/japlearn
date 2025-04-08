@@ -1,12 +1,19 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/lib/auth';
+import { type NextRequest } from 'next/server';
 
 const VALID_CATEGORIES = ['hiragana', 'katakana'];
 
+type RouteContext = {
+  params: {
+    category: string;
+  };
+};
+
 export async function GET(
-  request: Request,
-  context: { params: { category: string } }
+  req: NextRequest,
+  { params }: RouteContext
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -14,7 +21,7 @@ export async function GET(
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const category = context.params.category.toLowerCase();
+    const category = params.category.toLowerCase();
     if (!VALID_CATEGORIES.includes(category)) {
       return NextResponse.json(
         { error: 'Invalid category. Must be hiragana or katakana' },
