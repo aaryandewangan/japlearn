@@ -1,12 +1,9 @@
 import { NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 
-export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: Request) {
   try {
-    const certificateId = params.id;
+    const certificateId = request.url.split('/').pop();
     const result = await sql`
       SELECT 
         c.id,
