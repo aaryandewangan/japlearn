@@ -5,15 +5,9 @@ import { type NextRequest } from 'next/server';
 
 const VALID_CATEGORIES = ['hiragana', 'katakana'];
 
-type RouteContext = {
-  params: {
-    category: string;
-  };
-};
-
 export async function GET(
-  req: NextRequest,
-  { params }: RouteContext
+  request: NextRequest,
+  { params }: { params: { category: string } }
 ) {
   try {
     const session = await getServerSession(authOptions);
