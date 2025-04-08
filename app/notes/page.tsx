@@ -22,6 +22,8 @@ import CodeBlock from '@tiptap/extension-code-block';
 import ConfirmDialog from '@/app/components/ConfirmDialog';
 import DrawingCanvas from '@/app/components/DrawingCanvas';
 import LimitWarningDialog from '@/app/components/LimitWarningDialog';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 interface Note {
   id: string;
@@ -261,6 +263,8 @@ const MenuBar = ({
 };
 
 export default function NotesPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const [notes, setNotes] = useState<Note[]>([]);
   const [currentNote, setCurrentNote] = useState<Note | null>(null);
   const [loading, setLoading] = useState(false);
@@ -323,16 +327,29 @@ export default function NotesPage() {
   }, [currentNote?.id, editor]);
 
   useEffect(() => {
-    fetchNotes();
-  }, []);
+    if (status === 'unauthenticated') {
+      router.push('/login');
+      return;
+    }
+    
+    if (status === 'authenticated') {
+      fetchNotes();
+    }
+  }, [status, router]);
 
   const fetchNotes = async () => {
     try {
       const response = await fetch('/api/notes');
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to fetch notes');
+      }
       const data = await response.json();
-      setNotes(data);
-    } catch (error) {
-      toast.error('Failed to fetch notes');
+      setNotes(Array.isArray(data) ? data : []);
+    } catch (error: any) {
+      console.error('Error fetching notes:', error);
+      toast.error(error.message || 'Failed to fetch notes');
+      setNotes([]);
     }
   };
 

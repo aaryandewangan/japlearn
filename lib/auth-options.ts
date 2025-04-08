@@ -1,8 +1,88 @@
 import { NextAuthOptions } from "next-auth";
+import type { DefaultSession } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import prisma from "@/lib/prisma";
+import { sql } from '@vercel/postgres';
 import bcrypt from "bcryptjs";
 
+declare module "next-auth" {
+  interface User {
+    id: string;
+    is_admin: boolean;
+  }
+  interface Session {
+    user: {
+      id: string;
+      is_admin: boolean;
+    } & DefaultSession["user"]
+  }
+}
+
+declare module "next-auth/jwt" {
+  interface JWT {
+    id: string;
+    is_admin: boolean;
+  }
+}
+
 export const authOptions: NextAuthOptions = {
-  // ... keep existing configuration
+  providers: [
+    CredentialsProvider({
+      name: 'Credentials',
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" }
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) {
+          throw new Error('Please enter an email and password');
+        }
+
+        const user = await sql`
+          SELECT * FROM users 
+          WHERE email = ${credentials.email}
+        `;
+
+        if (!user.rows.length) {
+          throw new Error('No user found');
+        }
+
+        const passwordMatch = await bcrypt.compare(
+          credentials.password,
+          user.rows[0].password
+        );
+
+        if (!passwordMatch) {
+          throw new Error('Incorrect password');
+        }
+
+        return {
+          id: user.rows[0].id,
+          email: user.rows[0].email,
+          name: user.rows[0].name,
+          is_admin: user.rows[0].is_admin,
+        };
+      }
+    })
+  ],
+  secret: process.env.NEXTAUTH_SECRET,
+  pages: {
+    signIn: '/login',
+  },
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+        token.is_admin = user.is_admin;
+        token.name = user.name;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (session?.user) {
+        session.user.id = token.id;
+        session.user.is_admin = token.is_admin;
+      }
+      return session;
+    }
+  }
 }; 
