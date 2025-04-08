@@ -7,17 +7,14 @@ const VALID_DIFFICULTIES = ['easy', 'medium', 'hard'];
 const PASSING_SCORE = 80;
 const VALID_CATEGORIES = ['hiragana', 'katakana'];
 
-export async function GET(
-  request: Request,
-  { params }: { params: { category: string } }
-) {
+export async function GET(request: Request) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const category = params.category.toLowerCase();
+    const category = request.url.split('/').slice(-2)[0].toLowerCase();
     if (!VALID_CATEGORIES.includes(category)) {
       return NextResponse.json(
         { error: 'Invalid category. Must be hiragana or katakana' },
