@@ -4,17 +4,14 @@ import { authOptions } from '@/app/lib/auth';
 
 const VALID_CATEGORIES = ['hiragana', 'katakana'];
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { category: string } }
-) {
+export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const category = params.category.toLowerCase();
+    const category = request.url.split('/').slice(-2)[0].toLowerCase();
     if (!VALID_CATEGORIES.includes(category)) {
       return NextResponse.json(
         { error: 'Invalid category. Must be hiragana or katakana' },
