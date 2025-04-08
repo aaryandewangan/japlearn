@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useSession, signOut } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Header from '@/app/components/layout/Header';
 import EditPasswordModal from '@/app/components/EditPasswordModal';
@@ -16,6 +16,22 @@ interface User {
   notesCount: number;
   lastActive: string;
   is_admin: boolean;
+}
+
+interface SessionUser {
+  id: string;
+  email: string;
+  name?: string;
+  is_admin: boolean;
+}
+
+interface ToggleAdminResponse {
+  success: boolean;
+  user: User;
+}
+
+interface UpdatePasswordResponse {
+  success: boolean;
 }
 
 export default function AdminDashboard() {
@@ -36,7 +52,6 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<'users' | 'notes' | 'settings'>('users');
 
   useEffect(() => {
-    // Check authentication and admin status
     if (status === 'loading') return;
     
     if (status === 'unauthenticated') {
@@ -44,20 +59,14 @@ export default function AdminDashboard() {
       return;
     }
 
-    console.log('Full Session:', session);
-    console.log('User:', session?.user);
-
-    // Check both is_admin flag and admin email
-    const isAdmin = Boolean((session?.user as any)?.is_admin) || 
-                   session?.user?.email === 'admin@japlearn.com';
-    console.log('Is Admin?:', isAdmin);
+    const sessionUser = session?.user as SessionUser | undefined;
+    const isAdmin = sessionUser?.is_admin || sessionUser?.email === 'admin@japlearn.com';
 
     if (!isAdmin) {
       router.push('/dashboard');
       return;
     }
 
-    // Fetch users if authenticated and admin
     const fetchUsers = async () => {
       try {
         const response = await fetch('/api/admin/users');
@@ -108,18 +117,20 @@ export default function AdminDashboard() {
           is_admin: !user.is_admin,
         }),
       });
-      const data = await response.json();
+      
+      const data: ToggleAdminResponse = await response.json();
 
       if (data.success && data.user) {
         setUsers(users.map(u => 
           u.id === user.id ? data.user : u
         ));
 
-        if (user.id === (session?.user as any)?.id) {
+        const sessionUser = session?.user as SessionUser;
+        if (user.id === sessionUser?.id) {
           await updateSession({
             ...session,
             user: {
-              ...session?.user,
+              ...sessionUser,
               is_admin: data.user.is_admin
             }
           });
@@ -128,15 +139,14 @@ export default function AdminDashboard() {
         showToast.success(
           user.is_admin 
             ? 'Admin privileges removed' 
-            : 'User promoted to admin'
+            : 'Admin privileges granted'
         );
       } else {
-        throw new Error(data.error || 'Failed to update user role');
+        throw new Error('Failed to update user role');
       }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to update user role';
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update user role';
       showToast.error(errorMessage);
-      setError(errorMessage);
     }
   };
 
@@ -152,16 +162,17 @@ export default function AdminDashboard() {
         body: JSON.stringify({ password: newPassword }),
       });
 
-      const data = await response.json();
+      const data: UpdatePasswordResponse = await response.json();
 
-      if (!data.success) {
-        throw new Error(data.error);
+      if (data.success) {
+        showToast.success('Password updated successfully');
+        setEditingUser(null);
+      } else {
+        throw new Error('Failed to update password');
       }
-
-      showToast.success('Password updated successfully');
-    } catch (err) {
-      showToast.error('Failed to update password');
-      throw new Error('Failed to update password');
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update password';
+      showToast.error(errorMessage);
     }
   };
 
@@ -194,7 +205,7 @@ export default function AdminDashboard() {
   }
 
   // Don't show anything while redirecting
-  if (!session || !(session.user as any)?.is_admin) {
+  if (!session || !(session.user as SessionUser)?.is_admin) {
     return null;
   }
 
@@ -437,4 +448,4 @@ export default function AdminDashboard() {
       />
     </>
   );
-} 
+}

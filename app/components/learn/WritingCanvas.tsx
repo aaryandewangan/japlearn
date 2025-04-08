@@ -1,16 +1,15 @@
 'use client';
 
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { calculateSimilarity } from '@/app/utils/characterSimilarity';
 
 interface WritingCanvasProps {
   character: string;
   onClear: () => void;
   onSimilarityCheck?: (similarity: number) => void;
-  showSimilarity?: boolean;
 }
 
-const WritingCanvas: React.FC<WritingCanvasProps> = ({ character, onClear, onSimilarityCheck, showSimilarity }) => {
+const WritingCanvas: React.FC<WritingCanvasProps> = ({ character, onClear, onSimilarityCheck }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const referenceCanvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
@@ -18,7 +17,7 @@ const WritingCanvas: React.FC<WritingCanvasProps> = ({ character, onClear, onSim
   const [lastX, setLastX] = useState(0);
   const [lastY, setLastY] = useState(0);
 
-  useEffect(() => {
+  const initializeCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -46,51 +45,28 @@ const WritingCanvas: React.FC<WritingCanvasProps> = ({ character, onClear, onSim
     ctx.textBaseline = 'middle';
     ctx.fillText(character, rect.width / 2, rect.height / 2);
     ctx.globalAlpha = 1;
-
-    // Setup reference canvas with the correct character
-    const refCanvas = referenceCanvasRef.current;
-    if (refCanvas) {
-      const refCtx = refCanvas.getContext('2d');
-      if (refCtx) {
-        refCtx.font = '200px "Noto Sans JP"';
-        refCtx.fillStyle = '#000000';
-        refCtx.textAlign = 'center';
-        refCtx.textBaseline = 'middle';
-        refCtx.fillText(character, refCanvas.width / 2, refCanvas.height / 2);
-      }
-    }
   }, [character]);
 
-  const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
-    setIsDrawing(true);
-    const coords = getCoordinates(e);
-    setLastX(coords.x);
-    setLastY(coords.y);
-  };
+  const initializeReferenceCanvas = useCallback(() => {
+    const refCanvas = referenceCanvasRef.current;
+    if (!refCanvas) return;
 
-  const draw = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
-    if (!isDrawing || !context) return;
+    const refCtx = refCanvas.getContext('2d');
+    if (!refCtx) return;
 
-    e.preventDefault();
-    const coords = getCoordinates(e);
-    
-    context.beginPath();
-    context.moveTo(lastX, lastY);
-    context.lineTo(coords.x, coords.y);
-    context.stroke();
+    refCtx.font = '200px "Noto Sans JP"';
+    refCtx.fillStyle = '#000000';
+    refCtx.textAlign = 'center';
+    refCtx.textBaseline = 'middle';
+    refCtx.fillText(character, refCanvas.width / 2, refCanvas.height / 2);
+  }, [character]);
 
-    setLastX(coords.x);
-    setLastY(coords.y);
-    
-    // Check similarity after each stroke
-    checkSimilarity();
-  };
+  useEffect(() => {
+    initializeCanvas();
+    initializeReferenceCanvas();
+  }, [initializeCanvas, initializeReferenceCanvas]);
 
-  const stopDrawing = () => {
-    setIsDrawing(false);
-  };
-
-  const getCoordinates = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+  const getCoordinates = useCallback((e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return { x: 0, y: 0 };
 
@@ -105,20 +81,47 @@ const WritingCanvas: React.FC<WritingCanvasProps> = ({ character, onClear, onSim
       x: e.clientX - rect.left,
       y: e.clientY - rect.top
     };
-  };
+  }, []);
 
-  const clearCanvas = () => {
-    if (!context || !canvasRef.current) return;
-    context.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-    if (onClear) onClear();
-  };
-
-  const checkSimilarity = () => {
+  const checkSimilarity = useCallback(() => {
     if (!canvasRef.current || !referenceCanvasRef.current || !onSimilarityCheck) return;
-    
     const similarity = calculateSimilarity(canvasRef.current, referenceCanvasRef.current);
     onSimilarityCheck(similarity);
-  };
+  }, [onSimilarityCheck]);
+
+  const clearCanvas = useCallback(() => {
+    if (!context || !canvasRef.current) return;
+    context.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+    onClear();
+  }, [context, onClear]);
+
+  const startDrawing = useCallback((e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+    setIsDrawing(true);
+    const coords = getCoordinates(e);
+    setLastX(coords.x);
+    setLastY(coords.y);
+  }, [getCoordinates]);
+
+  const draw = useCallback((e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+    if (!isDrawing || !context) return;
+
+    e.preventDefault();
+    const coords = getCoordinates(e);
+    
+    context.beginPath();
+    context.moveTo(lastX, lastY);
+    context.lineTo(coords.x, coords.y);
+    context.stroke();
+
+    setLastX(coords.x);
+    setLastY(coords.y);
+    
+    checkSimilarity();
+  }, [isDrawing, context, lastX, lastY, getCoordinates, checkSimilarity]);
+
+  const stopDrawing = useCallback(() => {
+    setIsDrawing(false);
+  }, []);
 
   return (
     <div className="w-full">
@@ -144,4 +147,4 @@ const WritingCanvas: React.FC<WritingCanvasProps> = ({ character, onClear, onSim
   );
 };
 
-export default WritingCanvas; 
+export default WritingCanvas;

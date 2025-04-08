@@ -11,13 +11,10 @@ import { useSession } from 'next-auth/react';
 import { FiAlertCircle } from 'react-icons/fi';
 
 export default function LearnPage() {
-  const { theme } = useTheme();
-  const [mounted, setMounted] = useState(false);
   const session = useSession();
   const [showWarning, setShowWarning] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
     const hasSeenWarning = localStorage.getItem('hasSeenBrowserWarning');
     if (!hasSeenWarning) {
       setShowWarning(true);

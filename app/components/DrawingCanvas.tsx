@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 
 interface DrawingCanvasProps {
   onSave: (dataUrl: string) => void;
@@ -22,7 +22,7 @@ export default function DrawingCanvas({ onSave, onClose }: DrawingCanvasProps) {
     tool: 'pen'
   });
 
-  useEffect(() => {
+  const initializeCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -39,7 +39,11 @@ export default function DrawingCanvas({ onSave, onClose }: DrawingCanvasProps) {
     context.strokeStyle = options.color;
     context.lineWidth = options.width;
     contextRef.current = context;
-  }, []);
+  }, [options.color, options.width]);
+
+  useEffect(() => {
+    initializeCanvas();
+  }, [initializeCanvas]);
 
   useEffect(() => {
     if (!contextRef.current) return;
@@ -60,7 +64,7 @@ export default function DrawingCanvas({ onSave, onClose }: DrawingCanvasProps) {
     } else {
       contextRef.current.globalCompositeOperation = 'source-over';
     }
-  }, [options]);
+  }, [options.color, options.width, options.tool]);
 
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
