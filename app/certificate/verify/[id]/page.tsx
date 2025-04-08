@@ -11,7 +11,12 @@ interface VerificationResult {
   verified: boolean;
 }
 
-export default function VerifyPage({ params }: { params: { id: string } }) {
+export default function VerifyPage({
+  params,
+}: {
+  params: { id: string };
+  searchParams?: { [key: string]: string | string[] | undefined };
+}) {
   const [verification, setVerification] = useState<VerificationResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
