@@ -5,8 +5,8 @@ import { authOptions } from '@/app/lib/auth';
 const VALID_CATEGORIES = ['hiragana', 'katakana'];
 
 export async function GET(
-
-  context: { params: { category: string } }
+  req: NextRequest,
+  { params }: { params: { category: string } }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -14,7 +14,7 @@ export async function GET(
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const category = context.params.category.toLowerCase();
+    const category = params.category.toLowerCase();
     if (!VALID_CATEGORIES.includes(category)) {
       return NextResponse.json(
         { error: 'Invalid category. Must be hiragana or katakana' },
@@ -29,7 +29,6 @@ export async function GET(
       day: 'numeric'
     });
 
-    // Capitalize first letter for display
     const displayCategory = category.charAt(0).toUpperCase() + category.slice(1);
 
     return NextResponse.json({
@@ -46,4 +45,4 @@ export async function GET(
       { status: 500 }
     );
   }
-} 
+}
