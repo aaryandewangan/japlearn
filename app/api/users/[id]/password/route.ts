@@ -5,7 +5,7 @@ import bcrypt from 'bcryptjs';
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
     const token = await getToken({ req: request as any });
@@ -20,7 +20,7 @@ export async function PATCH(
     await sql`
       UPDATE users 
       SET password = ${hashedPassword}
-      WHERE id = ${params.id}
+      WHERE id = ${context.params.id}
     `;
     
     return NextResponse.json({ success: true });
