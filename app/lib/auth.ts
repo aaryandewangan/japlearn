@@ -1,9 +1,9 @@
-import { AuthOptions } from 'next-auth';
-import CredentialsProvider from 'next-auth/providers/credentials';
+import { NextAuthOptions } from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
 import { sql } from '@vercel/postgres';
 import bcrypt from 'bcryptjs';
 
-export const authOptions: AuthOptions = {
+export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: 'Credentials',
@@ -61,9 +61,8 @@ export const authOptions: AuthOptions = {
     },
     async session({ session, token }) {
       if (session?.user) {
-        (session.user as any).id = token.id;
-        (session.user as any).is_admin = token.is_admin;
-        session.user.name = token.name as string;
+        session.user.is_admin = token.is_admin;
+        session.user.id = token.id;
       }
       return session;
     }
