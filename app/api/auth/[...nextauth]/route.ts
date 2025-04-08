@@ -1,7 +1,9 @@
 import NextAuth from 'next-auth';
+import { JWT } from 'next-auth/jwt';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { sql } from '@vercel/postgres';
 import bcrypt from 'bcryptjs';
+import { User } from 'next-auth';
 
 export const authOptions = {
   providers: [
@@ -48,7 +50,12 @@ export const authOptions = {
     signIn: '/login',
   },
   callbacks: {
-    async jwt({ token, user, trigger, session }) {
+    async jwt({ token, user, trigger, session }: { 
+      token: JWT; 
+      user?: User; 
+      trigger?: "signIn" | "signUp" | "update"; 
+      session?: any; 
+    }) {
       if (trigger === "update" && session?.is_admin !== undefined) {
         token.is_admin = session.is_admin;
       }
@@ -59,7 +66,10 @@ export const authOptions = {
       }
       return token;
     },
-    async session({ session, token }) {
+    async session({ session, token }: { 
+      session: any; 
+      token: JWT; 
+    }) {
       if (session?.user) {
         (session.user as any).is_admin = token.is_admin;
         (session.user as any).id = token.id;
