@@ -4,8 +4,7 @@ import { getToken } from 'next-auth/jwt';
 import bcrypt from 'bcryptjs';
 
 export async function PATCH(
-  request: Request,
-  context: { params: { id: string } }
+  { request, params }: { request: Request; params: { id: string } }
 ) {
   try {
     const token = await getToken({ req: request as any });
@@ -20,7 +19,7 @@ export async function PATCH(
     await sql`
       UPDATE users 
       SET password = ${hashedPassword}
-      WHERE id = ${context.params.id}
+      WHERE id = ${params.id}
     `;
     
     return NextResponse.json({ success: true });
