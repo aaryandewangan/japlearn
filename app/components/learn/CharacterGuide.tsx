@@ -82,9 +82,8 @@ const CharacterGuide: React.FC<CharacterGuideProps> = ({
           </ul>
         </div>
       )}
-
       {/* Common Mistakes */}
-      {commonMistakes?.length > 0 && (
+      {commonMistakes && commonMistakes.length > 0 && (
         <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
             Common Mistakes to Avoid
@@ -102,9 +101,8 @@ const CharacterGuide: React.FC<CharacterGuideProps> = ({
           </ul>
         </div>
       )}
-
       {/* Similar Characters */}
-      {similarCharacters?.length > 0 && (
+      {Array.isArray(similarCharacters) && similarCharacters.length > 0 && (
         <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
             Similar Characters

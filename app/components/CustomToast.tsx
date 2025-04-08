@@ -21,7 +21,7 @@ const playSound = (type: keyof typeof sounds) => {
 export const showToast = {
   success: (message: string) => {
     playSound('success');
-    return toast.custom((t) => (
+    return toast.custom((t: { visible: boolean; id: string }) => (
       <motion.div
         variants={toastVariants}
         initial="initial"
@@ -66,7 +66,7 @@ export const showToast = {
 
   error: (message: string) => {
     playSound('error');
-    return toast.custom((t) => (
+    return toast.custom((t: { visible: boolean; id: string }) => (
       <motion.div
         variants={toastVariants}
         initial="initial"
@@ -110,7 +110,7 @@ export const showToast = {
 
   warning: (message: string) => {
     playSound('warning');
-    return toast.custom((t) => (
+    return toast.custom((t: { visible: boolean; id: string }) => (
       <motion.div
         variants={toastVariants}
         initial="initial"
@@ -154,7 +154,7 @@ export const showToast = {
 
   info: (message: string) => {
     playSound('info');
-    return toast.custom((t) => (
+    return toast.custom((t: { visible: boolean; id: string }) => (
       <motion.div
         variants={toastVariants}
         initial="initial"

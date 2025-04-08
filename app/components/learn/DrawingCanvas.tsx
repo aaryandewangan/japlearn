@@ -27,7 +27,7 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ onSubmit, expectedCharact
     }
   }, []);
 
-  const getCoordinates = (event: MouseEvent | Touch, canvas: HTMLCanvasElement) => {
+  const getCoordinates = (event: MouseEvent | React.Touch, canvas: HTMLCanvasElement) => {
     const rect = canvas.getBoundingClientRect();
     return {
       x: event.clientX - rect.left,

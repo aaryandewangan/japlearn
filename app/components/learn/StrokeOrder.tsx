@@ -31,11 +31,10 @@ const StrokeOrder: React.FC<StrokeOrderProps> = ({ character }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [currentStroke, setCurrentStroke] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const animationRef = useRef<number>();
+  const animationRef = useRef<number | undefined>(undefined);
 
   const drawStrokes = (ctx: CanvasRenderingContext2D, upToStroke: number) => {
     ctx.clearRect(0, 0, 200, 200);
-    
     if (!strokeData[character]) return;
 
     // Set up the canvas context

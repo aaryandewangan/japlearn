@@ -2,12 +2,14 @@
 import { FiDownload } from 'react-icons/fi';
 import { jsPDF } from 'jspdf';
 
+// Import Noto Sans JP font
+const notoSansJPBase64 = 'YOUR_FONT_BASE64_STRING'; // Replace this with actual base64 string
+
 export default function HiraganaPDF() {
   const generatePDF = () => {
     const doc = new jsPDF();
-    
     // Set font for Japanese characters
-    doc.addFileToVFS('NotoSansJP-Regular.ttf', notoSansJPBase64); // You'll need the font file
+    doc.addFileToVFS('NotoSansJP-Regular.ttf', notoSansJPBase64);
     doc.addFont('NotoSansJP-Regular.ttf', 'NotoSansJP', 'normal');
     doc.setFont('NotoSansJP');
 

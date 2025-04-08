@@ -9,10 +9,10 @@ const deleteOldQuizzes = async (userId: string, tableName: string) => {
     WITH RankedQuizzes AS (
       SELECT id,
              ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY timestamp DESC) as rn
-      FROM ${sql(tableName)}
+      FROM "${tableName}"
       WHERE user_id = ${userId}
     )
-    DELETE FROM ${sql(tableName)}
+    DELETE FROM "${tableName}"
     WHERE id IN (
       SELECT id 
       FROM RankedQuizzes 
@@ -42,7 +42,7 @@ export async function GET(request: Request) {
         ROUND(AVG(percentage)::numeric, 2) as average_score,
         COUNT(CASE WHEN passed THEN 1 END) as quizzes_passed,
         MAX(percentage) as highest_score
-      FROM ${sql(tableName)}
+      FROM "${tableName}"
       WHERE user_id = ${userId}
     `;
 
@@ -53,7 +53,7 @@ export async function GET(request: Request) {
         COUNT(*) as attempts,
         ROUND(AVG(percentage)::numeric, 2) as average_score,
         COUNT(CASE WHEN passed THEN 1 END) as passed_count
-      FROM ${sql(tableName)}
+      FROM "${tableName}"
       WHERE user_id = ${userId}
       GROUP BY difficulty
     `;
@@ -67,7 +67,7 @@ export async function GET(request: Request) {
         percentage,
         passed,
         timestamp
-      FROM ${sql(tableName)}
+      FROM "${tableName}"
       WHERE user_id = ${userId}
       ORDER BY timestamp DESC 
       LIMIT 5
