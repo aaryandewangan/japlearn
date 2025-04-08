@@ -1,0 +1,192 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .nav-link {
+    @apply text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors;
+  }
+}
+
+/* Mobile-first responsive design */
+html {
+  @apply text-base;
+}
+
+body {
+  @apply antialiased;
+}
+
+/* Better touch targets on mobile */
+button, a {
+  @apply cursor-pointer min-h-[44px] min-w-[44px];
+}
+
+/* Prevent content shift when scrollbar appears */
+html {
+  @apply overflow-y-scroll;
+}
+
+/* Improved mobile form elements */
+input, select, textarea {
+  @apply text-base;
+  font-size: 16px !important; /* Prevents zoom on iOS */
+}
+
+/* Safe area padding for modern mobile devices */
+.safe-padding {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Add these styles */
+.ProseMirror {
+  min-height: 200px;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  outline: none;
+}
+
+.ProseMirror p {
+  margin: 1em 0;
+}
+
+.dark .ProseMirror {
+  color: #e5e7eb;
+}
+
+.ProseMirror img {
+  max-width: 100%;
+  height: auto;
+  margin: 1em 0;
+}
+
+.ProseMirror a {
+  color: #3b82f6;
+  text-decoration: underline;
+}
+
+.dark .ProseMirror a {
+  color: #60a5fa;
+}
+
+.ProseMirror code {
+  background-color: #f3f4f6;
+  padding: 0.2em 0.4em;
+  border-radius: 0.25rem;
+  font-family: monospace;
+}
+
+.dark .ProseMirror code {
+  background-color: #374151;
+}
+
+/* Editor Styles */
+.tiptap {
+  > * + * {
+    margin-top: 0.75em;
+  }
+}
+
+.tiptap ul,
+.tiptap ol {
+  padding: 0 1rem;
+}
+
+.tiptap h1,
+.tiptap h2,
+.tiptap h3,
+.tiptap h4,
+.tiptap h5,
+.tiptap h6 {
+  line-height: 1.1;
+}
+
+.tiptap code {
+  background-color: rgba(97, 97, 97, 0.1);
+  color: #616161;
+}
+
+.tiptap pre {
+  background: #0D0D0D;
+  color: #FFF;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+}
+
+.tiptap pre code {
+  color: inherit;
+  padding: 0;
+  background: none;
+  font-size: 0.8rem;
+}
+
+.tiptap img {
+  max-width: 100%;
+  height: auto;
+}
+
+.tiptap blockquote {
+  padding-left: 1rem;
+  border-left: 2px solid rgba(13, 13, 13, 0.1);
+}
+
+.tiptap hr {
+  border: none;
+  border-top: 2px solid rgba(13, 13, 13, 0.1);
+  margin: 2rem 0;
+}
+
+/* Dark mode styles */
+.dark .tiptap code {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #e0e0e0;
+}
+
+.dark .tiptap blockquote {
+  border-left-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark .tiptap hr {
+  border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Editor toolbar styles */
+.editor-toolbar {
+  @apply flex flex-wrap gap-1 p-2 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800;
+}
+
+.editor-toolbar button {
+  @apply p-2 rounded-lg transition-colors;
+  @apply text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white;
+  @apply hover:bg-gray-100 dark:hover:bg-gray-700;
+}
+
+.editor-toolbar button.is-active {
+  @apply bg-gray-200 dark:bg-gray-600;
+}
+
+.editor-toolbar select {
+  @apply p-2 rounded-lg bg-transparent border border-gray-200 dark:border-gray-700;
+  @apply text-gray-600 dark:text-gray-400;
+  @apply hover:bg-gray-100 dark:hover:bg-gray-700;
+}
