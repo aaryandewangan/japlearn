@@ -3,20 +3,18 @@ import { getServerSession } from 'next-auth';
 import { sql } from '@vercel/postgres';
 import { authOptions } from '@/app/lib/auth';
 
-export async function GET(
-  request: Request,
-  { params }: { params: { category: string } }
-) {
+export async function GET(request: Request) {
   try {
+    const category = request.url.split('/').slice(-2)[0].toLowerCase();
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const category = params.category;
     const tableName = `${category}_quiz_results`;
+    const userId = (session.user as any).id;
 
-    const quizzes = await sql`
+    const quizzes = await sql.query(`
       SELECT 
         difficulty,
         score,
@@ -25,10 +23,10 @@ export async function GET(
         passed,
         answer_history,
         timestamp
-      FROM ${sql(tableName)}
-      WHERE user_id = ${(session.user as any).id}
+      FROM ${tableName}
+      WHERE user_id = $1
       ORDER BY timestamp DESC
-    `;
+    `, [userId]);
 
     return NextResponse.json({
       quizzes: quizzes.rows

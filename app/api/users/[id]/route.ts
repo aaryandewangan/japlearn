@@ -2,11 +2,12 @@ import { sql } from '@vercel/postgres';
 import { NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 
-export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: Request) {
   try {
+    const userId = request.url.split('/').pop();
+    if (!userId) {
+      return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
+    }
     const token = await getToken({ req: request as any });
     
     if (!(token as any)?.is_admin) {
@@ -19,7 +20,7 @@ export async function DELETE(
     `;
 
     const userToDelete = await sql`
-      SELECT is_admin FROM users WHERE id = ${params.id};
+      SELECT is_admin FROM users WHERE id = ${userId};
     `;
 
     if (userToDelete.rows[0]?.is_admin && adminCount.rows[0].count <= 1) {
@@ -33,7 +34,7 @@ export async function DELETE(
     // Delete the user
     const result = await sql`
       DELETE FROM users 
-      WHERE id = ${params.id}
+      WHERE id = ${userId}
       RETURNING id;
     `;
 
@@ -51,11 +52,12 @@ export async function DELETE(
   }
 }
 
-export async function PATCH(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(request: Request) {
   try {
+    const userId = request.url.split('/').pop();
+    if (!userId) {
+      return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
+    }
     const token = await getToken({ req: request as any });
     
     if (!(token as any)?.is_admin) {
@@ -65,7 +67,7 @@ export async function PATCH(
     const { is_admin } = await request.json();
 
     // Prevent removing admin role from self
-    if ((token as any).id === parseInt(params.id) && !is_admin) {
+    if ((token as any).id === parseInt(userId) && !is_admin) {
       return NextResponse.json({ 
         error: 'Cannot remove admin role from yourself' 
       }, { 
@@ -77,7 +79,7 @@ export async function PATCH(
     const result = await sql`
       UPDATE users 
       SET is_admin = ${is_admin}
-      WHERE id = ${params.id}
+      WHERE id = ${userId}
       RETURNING id, email, is_admin;
     `;
     
